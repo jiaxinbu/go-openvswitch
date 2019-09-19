@@ -20,7 +20,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/digitalocean/go-openvswitch/ovsdb"
+	"github.com/jiaxinbu/go-openvswitch/ovsdb"
 )
 
 // This example demonstrates basic usage of a Client.  The Client connects to
@@ -32,7 +32,9 @@ func ExampleClient_listDatabases() {
 		log.Fatalf("failed to dial: %v", err)
 	}
 	// Be sure to close the connection!
-	defer c.Close()
+	defer func() {
+		_ = c.Close()
+	}()
 
 	// Ask ovsdb-server for all of its databases, but only allow the RPC
 	// a limited amount of time to complete before timing out.

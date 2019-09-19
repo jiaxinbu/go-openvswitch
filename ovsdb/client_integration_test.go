@@ -21,13 +21,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/digitalocean/go-openvswitch/ovsdb"
 	"github.com/google/go-cmp/cmp"
+	"github.com/jiaxinbu/go-openvswitch/ovsdb"
 )
 
 func TestClientIntegration(t *testing.T) {
 	c := dialOVSDB(t)
-	defer c.Close()
+	defer func() {
+		_ = c.Close()
+	}()
 
 	// Cancel RPCs if they take too long.
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -44,7 +46,9 @@ func TestClientIntegration(t *testing.T) {
 
 func TestClientIntegrationConcurrent(t *testing.T) {
 	c := dialOVSDB(t)
-	defer c.Close()
+	defer func() {
+		_ = c.Close()
+	}()
 
 	const n = 512
 
