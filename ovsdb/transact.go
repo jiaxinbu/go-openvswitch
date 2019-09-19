@@ -14,7 +14,9 @@
 
 package ovsdb
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 // A Cond is a conditional expression which is evaluated by the OVSDB server
 // in a transaction.
@@ -49,8 +51,6 @@ type TransactOp interface {
 	json.Marshaler
 }
 
-var _ TransactOp = Select{}
-
 // Select is a TransactOp which fetches information from a database.
 type Select struct {
 	// The name of the table to select from.
@@ -59,25 +59,26 @@ type Select struct {
 	// Zero or more Conds for conditional select.
 	Where []Cond
 
-	// TODO(mdlayher): specify columns.
+	// Columns to be included in returned rows.
+	Columns []string
 }
 
 // MarshalJSON implements json.Marshaler.
 func (s Select) MarshalJSON() ([]byte, error) {
-	// Send an empty array instead of nil if no where clause.
-	where := s.Where
-	if where == nil {
-		where = []Cond{}
+	sel := struct {
+		Op      string   `json:"op"`
+		Table   string   `json:"table"`
+		Where   []Cond   `json:"where"`
+		Columns []string `json:"columns,omitempty"`
+	}{
+		Op:      "select",
+		Table:   s.Table,
+		Where:   s.Where,
+		Columns: s.Columns,
 	}
 
-	sel := struct {
-		Op    string `json:"op"`
-		Table string `json:"table"`
-		Where []Cond `json:"where"`
-	}{
-		Op:    "select",
-		Table: s.Table,
-		Where: where,
+	if sel.Where == nil {
+		sel.Where = []Cond{}
 	}
 
 	return json.Marshal(sel)
